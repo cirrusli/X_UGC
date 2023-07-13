@@ -1,0 +1,25 @@
+port: 9000
+release: false
+
+mysql:
+  username: root
+  password: lzq
+  host: 127.0.0.1
+  port: 3306
+  db: campus_diary
+
+
+redis:
+  #Before redis6.0,do not fill in the username
+  username:
+  password: Redis:0617
+  host: 127.0.0.1
+  port: 6379
+  db: 0
+  poolSize: 32
+
+rabbitmq:
+  username: guest
+  password: guest
+  host: 127.0.0.1
+  port: 5672
