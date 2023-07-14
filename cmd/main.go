@@ -3,6 +3,7 @@ package cmd
 import (
 	"X_UGC/conf"
 	"X_UGC/dal"
+	"X_UGC/dal/redis"
 	"X_UGC/router"
 	"fmt"
 	"log"
@@ -24,11 +25,11 @@ func main() {
 	defer dal.CloseMySQL()
 	dal.InitTables()
 
-	err = dal.InitRedis(conf.C.Redis)
+	err = redis.Init(conf.C.Redis)
 	if err != nil {
 		log.Fatalln("Init redis failed: ", err)
 	}
-	defer dal.CloseRedis()
+	defer redis.Close()
 
 	r := router.Init()
 	err = r.Run(fmt.Sprintf(":%d", conf.C.Port))

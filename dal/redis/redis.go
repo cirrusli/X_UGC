@@ -1,4 +1,4 @@
-package dal
+package redis
 
 import (
 	"X_UGC/conf"
@@ -12,8 +12,8 @@ var (
 	RDB *redis.Client
 )
 
-// InitRedis 初始化连接
-func InitRedis(cfg *conf.Redis) (err error) {
+// Init 初始化连接
+func Init(cfg *conf.Redis) (err error) {
 	RDB = redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
 		Username: cfg.UserName,
@@ -29,7 +29,7 @@ func InitRedis(cfg *conf.Redis) (err error) {
 	return err
 }
 
-func CloseRedis() {
+func Close() {
 	err := RDB.Close()
 	if err != nil {
 		return
