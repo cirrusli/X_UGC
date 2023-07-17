@@ -7,6 +7,8 @@ require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/jinzhu/gorm v1.9.16
+	github.com/jordan-wright/email v4.0.1-0.20210109023952-943e75fe5223+incompatible
+	golang.org/x/crypto v0.9.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -33,7 +35,6 @@ require (
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.11 // indirect
 	golang.org/x/arch v0.3.0 // indirect
-	golang.org/x/crypto v0.9.0 // indirect
 	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/sys v0.8.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
