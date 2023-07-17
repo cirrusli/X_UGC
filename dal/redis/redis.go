@@ -35,3 +35,25 @@ func Close() {
 		return
 	}
 }
+
+// Del   删除key
+func Del(key string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	err := RDB.Del(ctx, key).Err()
+	defer cancel()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// Expire 设置过期时间
+func Expire(key string, expTime int32) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	err := RDB.Expire(ctx, key, time.Duration(expTime)*time.Second).Err()
+	defer cancel()
+	if err != nil {
+		return err
+	}
+	return nil
+}
