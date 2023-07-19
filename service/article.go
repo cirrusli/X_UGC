@@ -42,7 +42,7 @@ func UploadPhotoArticleResource(c *gin.Context) (coverFilePath string, articleFi
 	articleFiles := c.Request.MultipartForm.File["article_file"]
 	if coverFile != nil {
 		coverFileDir := "./upload/article_resource/user_" + strconv.Itoa(userid) + "/photo_" + strconv.FormatInt(unixNano, 10) + "/cover/"
-		os.MkdirAll(coverFileDir, os.ModePerm)
+		_ = os.MkdirAll(coverFileDir, os.ModePerm)
 		fileExt := filepath.Ext(coverFile.Filename)
 		coverFilePath = coverFileDir + "cover" + fileExt
 		if err = c.SaveUploadedFile(coverFile, coverFilePath); err != nil {

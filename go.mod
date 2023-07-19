@@ -8,6 +8,7 @@ require (
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/jinzhu/gorm v1.9.16
 	github.com/jordan-wright/email v4.0.1-0.20210109023952-943e75fe5223+incompatible
+	github.com/streadway/amqp v1.1.0
 	golang.org/x/crypto v0.9.0
 	gopkg.in/yaml.v3 v3.0.1
 )
