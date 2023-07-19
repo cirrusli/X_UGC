@@ -14,6 +14,23 @@ import (
 	"time"
 )
 
+// GetArticleTypeById 根据类型id获取文章类型
+func GetArticleTypeById(id int) (articleType *model.ArticleTypeDict) {
+	articleType = new(model.ArticleTypeDict)
+	if err := dal.DB.Where("id = ?", id).First(articleType).Error; err != nil {
+		return nil
+	}
+	return
+}
+
+// GetAllArticleType  获取所有文章类型
+func GetAllArticleType() (articleTypeList []*model.ArticleTypeDict, err error) {
+	if err = dal.DB.Find(&articleTypeList).Error; err != nil {
+		return nil, err
+	}
+	return
+}
+
 // UploadPhotoArticleResource 上传图片类型文章资源
 func UploadPhotoArticleResource(c *gin.Context) (coverFilePath string, articleFileDir string, err error) {
 	userid := c.GetInt("userid")

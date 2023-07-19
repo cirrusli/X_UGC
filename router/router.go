@@ -1,9 +1,9 @@
 package router
 
 import (
-	"X_UGC/common/mw"
 	"X_UGC/conf"
 	"X_UGC/handler"
+	"X_UGC/mw"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
