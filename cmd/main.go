@@ -1,10 +1,10 @@
 package cmd
 
 import (
+	"X_UGC/biz/dal"
+	"X_UGC/biz/dal/redis"
+	"X_UGC/biz/router"
 	"X_UGC/conf"
-	"X_UGC/dal"
-	"X_UGC/dal/redis"
-	"X_UGC/router"
 	"fmt"
 	"log"
 	"os"

@@ -1,8 +1,8 @@
 package service
 
 import (
-	"X_UGC/dal"
-	"X_UGC/model"
+	"X_UGC/biz/dal"
+	"X_UGC/biz/model"
 )
 
 // AddUser 添加一个用户

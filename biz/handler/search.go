@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"X_UGC/service"
+	"X_UGC/biz/service"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"

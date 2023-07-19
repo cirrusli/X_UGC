@@ -1,7 +1,7 @@
 package rabbitmq
 
 import (
-	"X_UGC/model"
+	"X_UGC/biz/model"
 	"encoding/json"
 	"github.com/streadway/amqp"
 )

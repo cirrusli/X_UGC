@@ -1,8 +1,10 @@
 package websocket
 
-import "X_UGC/model"
+import (
+	"X_UGC/biz/model"
+)
 
-//定义消息类型
+// 定义消息类型
 const (
 	Logout          = iota //注销
 	ToOneFriend            //一对一
@@ -14,7 +16,7 @@ const (
 	CommentNotify          //评论通知
 )
 
-//SendMsg 发送消息的类型
+// SendMsg 发送消息的类型
 type SendMsg struct {
 	Type      int      `json:"type"`       //消息类型
 	Content   string   `json:"content"`    //消息内容
@@ -22,7 +24,7 @@ type SendMsg struct {
 	ClientIDs []string `json:"client_ids"` //要发送用户的列表
 }
 
-//ReplyMsg 回复的消息
+// ReplyMsg 回复的消息
 type ReplyMsg struct {
 	MsgType  int    `json:"msg_type"`
 	FromUser string `json:"from_user"` //发送消息用户的所有信息
@@ -30,13 +32,13 @@ type ReplyMsg struct {
 	Content  string `json:"content"`   //消息内容
 }
 
-//MessageData 发送数据信息
+// MessageData 发送数据信息
 type MessageData struct {
 	FromUser string   `json:"from_user"`
 	Message  *SendMsg `json:"message"`
 }
 
-//HistoryMsg 发送历史数据
+// HistoryMsg 发送历史数据
 type HistoryMsg struct {
 	UserInfo    *model.UserInfo `json:"user_info"`
 	HistoryData []string        `json:"history_data"`

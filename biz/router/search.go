@@ -1,8 +1,8 @@
 package router
 
 import (
-	"X_UGC/handler"
-	"X_UGC/mw"
+	"X_UGC/biz/handler"
+	"X_UGC/biz/mw"
 	"github.com/gin-gonic/gin"
 )
 

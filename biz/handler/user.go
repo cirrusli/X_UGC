@@ -1,11 +1,12 @@
 package handler
 
 import (
-	"X_UGC/common/email"
-	"X_UGC/common/jwt"
-	"X_UGC/common/pwd"
-	"X_UGC/dal/redis"
-	"X_UGC/model"
+	"X_UGC/biz/dal/redis"
+	"X_UGC/biz/model"
+	service2 "X_UGC/biz/service"
+	"X_UGC/pkg/common/email"
+	"X_UGC/pkg/common/jwt"
+	"X_UGC/pkg/common/pwd"
 	"X_UGC/service"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -72,7 +73,7 @@ func Register(c *gin.Context) {
 	}
 	if val == jsonData["code"] {
 		// 3. 存入数据库
-		err = service.AddUser(&user)
+		err = service2.AddUser(&user)
 		var userInfo = model.UserInfo{
 			UserName: "用户" + user.Number[5:],
 			UserID:   user.ID,
@@ -81,7 +82,7 @@ func Register(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{"error": err.Error()})
 			return
 		}
-		if err = service.AddUserInfo(&userInfo); err != nil {
+		if err = service2.AddUserInfo(&userInfo); err != nil {
 			c.JSON(http.StatusOK, gin.H{"error": err.Error()})
 			return
 		}
@@ -107,7 +108,7 @@ func Register(c *gin.Context) {
 func Login(c *gin.Context) {
 	account := c.PostForm("account")
 	p := c.PostForm("password")
-	user, err := service.CheckAccount(account)
+	user, err := service2.CheckAccount(account)
 	isPwd := pwd.Decryption(user.Password, p)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{"error": err.Error()})
@@ -130,7 +131,7 @@ func Login(c *gin.Context) {
 // CheckAccount 检查账号
 func CheckAccount(c *gin.Context) {
 	account := c.Query("account")
-	user, err := service.CheckAccount(account)
+	user, err := service2.CheckAccount(account)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{"error": err.Error()})
 		return
@@ -146,7 +147,7 @@ func CheckAccount(c *gin.Context) {
 // GetAllUser 查询所有用户
 func GetAllUser(c *gin.Context) {
 	// 查询users这个表里的所有数据
-	userList, err := service.GetAllUser()
+	userList, err := service2.GetAllUser()
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{"error": err.Error()})
 		return
@@ -162,7 +163,7 @@ func GetAllUser(c *gin.Context) {
 func GetAUserById(c *gin.Context) {
 	userid := c.Query("userid")
 
-	user, err := service.GetAUserById(userid)
+	user, err := service2.GetAUserById(userid)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{"error": err.Error()})
 		return
@@ -187,7 +188,7 @@ func UpdateUserAccount(c *gin.Context) {
 		return
 	}
 	if val == jsonData["code"] {
-		if err = service.UpdateUserAccount(userid, jsonData["account_type"], jsonData["account"]); err != nil {
+		if err = service2.UpdateUserAccount(userid, jsonData["account_type"], jsonData["account"]); err != nil {
 			c.JSON(http.StatusOK, gin.H{"error": err.Error()})
 			return
 		}
@@ -205,7 +206,7 @@ func UpdateUserPassword(c *gin.Context) {
 	userid := c.GetInt("userid")
 	jsonData := make(map[string]string)
 	_ = c.BindJSON(&jsonData)
-	user, err := service.GetAUserById(strconv.Itoa(userid))
+	user, err := service2.GetAUserById(strconv.Itoa(userid))
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{"error": err.Error()})
 		return
@@ -218,7 +219,7 @@ func UpdateUserPassword(c *gin.Context) {
 	}
 	if val == jsonData["code"] {
 		if pwd.Decryption(user.Password, jsonData["old_pwd"]) {
-			err := service.UpdateUserPassword(userid, pwd.Encryption(jsonData["new_pwd"]))
+			err := service2.UpdateUserPassword(userid, pwd.Encryption(jsonData["new_pwd"]))
 			if err != nil {
 				c.JSON(http.StatusOK, gin.H{"error": err.Error()})
 				return
@@ -239,7 +240,7 @@ func UpdateUserPassword(c *gin.Context) {
 // DeleteAUser 删除用户
 func DeleteAUser(c *gin.Context) {
 	userid := c.Query("userid")
-	if err := service.DeleteAUser(userid); err != nil {
+	if err := service2.DeleteAUser(userid); err != nil {
 		c.JSON(http.StatusOK, gin.H{"error": err.Error()})
 		return
 	} else {
@@ -252,13 +253,13 @@ func DeleteAUser(c *gin.Context) {
 // UpdateUserInfo 更新用户信息
 func UpdateUserInfo(c *gin.Context) {
 	userid := c.GetInt("userid")
-	userInfo, err := service.GetAUserInfoByUserId(userid)
+	userInfo, err := service2.GetAUserInfoByUserId(userid)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{"error": err.Error()})
 		return
 	}
 	c.BindJSON(userInfo)
-	if err = service.UpdateUserInfo(userInfo); err != nil {
+	if err = service2.UpdateUserInfo(userInfo); err != nil {
 		c.JSON(http.StatusOK, gin.H{"error": err.Error()})
 		return
 	} else {
@@ -271,12 +272,12 @@ func UpdateUserInfo(c *gin.Context) {
 // GetAUserInfoByUserId 获取用户信息
 func GetAUserInfoByUserId(c *gin.Context) {
 	userid := c.GetInt("userid")
-	userInfo, err := service.GetAUserInfoByUserId(userid)
+	userInfo, err := service2.GetAUserInfoByUserId(userid)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{"error": err.Error()})
 		return
 	}
-	user, err := service.GetAUserById(strconv.Itoa(userid))
+	user, err := service2.GetAUserById(strconv.Itoa(userid))
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{"error": err.Error()})
 		return
@@ -291,7 +292,7 @@ func GetAUserInfoByUserId(c *gin.Context) {
 // GetAllUserInfo 获取所有用户信息
 func GetAllUserInfo(c *gin.Context) {
 	// 查询user_infos这个表里的所有数据
-	userInfoList, err := service.GetAllUserInfo()
+	userInfoList, err := service2.GetAllUserInfo()
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{"error": err.Error()})
 		return
@@ -327,7 +328,7 @@ func HeadPhotoUpload(c *gin.Context) {
 		return
 	} else {
 		//持久化头像路径
-		err = service.UpdateHeadPhoto(filePath, userid)
+		err = service2.UpdateHeadPhoto(filePath, userid)
 		if err != nil {
 			c.JSON(http.StatusOK, gin.H{"error": err.Error()})
 			return
@@ -363,7 +364,7 @@ func BackPhotoUpload(c *gin.Context) {
 		return
 	} else {
 		//持久化背景图片路径
-		err = service.UpdateBackPhoto(filePath, userid)
+		err = service2.UpdateBackPhoto(filePath, userid)
 		if err != nil {
 			c.JSON(http.StatusOK, gin.H{"error": err.Error()})
 			return

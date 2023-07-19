@@ -1,6 +1,8 @@
 package bloomfilter
 
-import "X_UGC/dal/redis"
+import (
+	"X_UGC/biz/dal/redis"
+)
 
 type BloomFilter struct {
 	Key            string

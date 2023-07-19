@@ -1,7 +1,7 @@
 package mw
 
 import (
-	"X_UGC/common/jwt"
+	"X_UGC/pkg/common/jwt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"

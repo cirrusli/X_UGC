@@ -1,7 +1,7 @@
 package service
 
 import (
-	"X_UGC/common/ffmpeg"
+	"X_UGC/pkg/common/ffmpeg"
 	"bufio"
 	"crypto/md5"
 	"encoding/hex"
