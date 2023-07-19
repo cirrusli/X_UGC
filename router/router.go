@@ -3,7 +3,7 @@ package router
 import (
 	"X_UGC/common/mw"
 	"X_UGC/conf"
-	"X_UGC/controller"
+	"X_UGC/handler"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -11,7 +11,7 @@ import (
 func Index(c *gin.Context) {
 	c.HTML(http.StatusOK, "index.html", nil)
 }
-func Init() *gin.Engine {
+func Register() *gin.Engine {
 	if conf.C.Release {
 		gin.SetMode(gin.ReleaseMode)
 	}
@@ -23,13 +23,13 @@ func Init() *gin.Engine {
 
 	r.GET("/", Index)
 	//发送邮箱验证码
-	r.GET("/sendCode", controller.SendCode)
-	r.POST("/register", controller.Register)
-	r.POST("/login", controller.Login)
-	r.GET("/check", controller.CheckAccount)
-	r.POST("/checkCode", controller.CheckCode)
+	r.GET("/sendCode", handler.SendCode)
+	r.POST("/register", handler.Register)
+	r.POST("/login", handler.Login)
+	r.GET("/check", handler.CheckAccount)
+	r.POST("/checkCode", handler.CheckCode)
 
 	//websocket聊天
-	r.GET("/webSocket", controller.WsHandler)
+	r.GET("/webSocket", handler.WsHandler)
 	return r
 }

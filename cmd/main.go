@@ -31,7 +31,7 @@ func main() {
 	}
 	defer redis.Close()
 
-	r := router.Init()
+	r := router.Register()
 	err = r.Run(fmt.Sprintf(":%d", conf.C.Port))
 	if err != nil {
 		log.Fatalln("Server start failed: ", err)
