@@ -1,6 +1,9 @@
 package rabbitmq
 
-import "log"
+import (
+	ws "X_UGC/pkg/websocket"
+	"log"
+)
 
 // FollowConsumer 消费关注通知
 func (mq *rabbitMQ) FollowConsumer() {
