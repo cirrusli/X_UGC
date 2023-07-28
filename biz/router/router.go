@@ -1,10 +1,9 @@
 package router
 
 import (
-	handler2 "X_UGC/biz/handler"
+	"X_UGC/biz/handler"
 	"X_UGC/biz/mw"
 	"X_UGC/conf"
-	"X_UGC/handler"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -24,13 +23,34 @@ func Register() *gin.Engine {
 
 	r.GET("/", Index)
 	//发送邮箱验证码
-	r.GET("/sendCode", handler2.SendCode)
-	r.POST("/register", handler2.Register)
-	r.POST("/login", handler2.Login)
-	r.GET("/check", handler2.CheckAccount)
-	r.POST("/checkCode", handler2.CheckCode)
+	r.GET("/sendCode", handler.SendCode)
+	r.POST("/register", handler.Register)
+	r.POST("/login", handler.Login)
+	r.GET("/check", handler.CheckAccount)
+	r.POST("/checkCode", handler.CheckCode)
 
 	//websocket聊天
 	r.GET("/webSocket", handler.WsHandler)
+
+	//用户信息路由组
+	UserInfoGroups(r)
+
+	//注册用户关系路由组
+	RelationInfoGroups(r)
+
+	//注册管理员操作路由组
+	ManageGroups(r)
+
+	//注册文章路由组
+	ArticlesGroups(r)
+
+	//注册评论路由组
+	CommentGroups(r)
+
+	//注册通知路由组
+	NotifyGroups(r)
+
+	//注册搜索路由组
+	SearchGroups(r)
 	return r
 }

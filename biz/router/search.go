@@ -10,7 +10,7 @@ func SearchGroups(r *gin.Engine) {
 	SearchGroup := r.Group("/search", mw.Auth())
 	{
 		//根据用户名搜索用户
-		//SearchGroup.GET("/searchUserByUserName", controller.SearchUserByUserName)
+		//SearchGroup.GET("/searchUserByUserName", handler.SearchUserByUserName)
 		//根据账号和用户名搜索用户
 		SearchGroup.GET("/searchUser", handler.SearchUser)
 		//根据标题或内容搜索文章
