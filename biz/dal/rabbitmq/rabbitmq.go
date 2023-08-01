@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/streadway/amqp"
 	"log"
+	"log/slog"
 )
 
 var (
@@ -152,13 +153,25 @@ func (mq *rabbitMQ) QueueBindExchange(queueName, routingKey, exchangeName string
 	return mq.channel.QueueBind(queueName, routingKey, exchangeName, false, nil)
 }
 
-// RabbitMQClose 关闭连接
-func (mq *rabbitMQ) RabbitMQClose() {
-	mq.channel.Close()
-	for _, channel := range mq.channelPool {
-		channel.Close()
+// Close 关闭连接
+func (mq *rabbitMQ) Close() {
+	err := mq.channel.Close()
+	if err != nil {
+		slog.Error("channel close error: ", err.Error())
+		return
 	}
-	mq.mqConn.Close()
+	for _, channel := range mq.channelPool {
+		err = channel.Close()
+		if err != nil {
+			slog.Error("channel close error: ", err.Error())
+			return
+		}
+	}
+	err = mq.mqConn.Close()
+	if err != nil {
+		slog.Error("mqConn close error: ", err.Error())
+		return
+	}
 }
 
 // ExchangeSend 通过exchange发送消息

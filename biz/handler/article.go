@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"X_UGC/biz/dal/rabbitmq"
 	"X_UGC/biz/model"
 	"X_UGC/biz/service"
 	"github.com/gin-gonic/gin"
@@ -203,7 +204,7 @@ func GiveLike(c *gin.Context) {
 			},
 			ArticleInfo: articleInfo,
 		}
-		err = rabbitmqutil.RMQ.GiveLikeProducer(giveLikeNotify)
+		err = rabbitmq.RMQ.GiveLikeProducer(giveLikeNotify)
 		if err != nil {
 			c.JSON(http.StatusOK, gin.H{"error": err.Error()})
 			return
