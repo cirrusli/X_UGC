@@ -11,7 +11,7 @@ import (
 
 // WsHandler 客户端连接
 func WsHandler(c *gin.Context) {
-	upGrande := websocket.Upgrader{
+	upGrade := websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 		CheckOrigin: func(r *http.Request) bool { // CheckOrigin解决跨域问题
@@ -20,10 +20,16 @@ func WsHandler(c *gin.Context) {
 		Subprotocols: []string{c.Request.Header.Get("Sec-WebSocket-Protocol")},
 	}
 
-	mc, _ := jwt.ParseToken(upGrande.Subprotocols[0])
+	// 解析JWT令牌
+	mc, err := jwt.ParseToken(upGrade.Subprotocols[0])
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	userId := strconv.Itoa(mc.UserID)
-	//创建连接
-	conn, err := upGrande.Upgrade(c.Writer, c.Request, nil)
+
+	// 创建WebSocket连接
+	conn, err := upGrade.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		return
 	}
