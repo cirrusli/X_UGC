@@ -44,9 +44,9 @@ type RabbitMQ struct {
 }
 
 func Init(file string) error {
-	yamlFile, err := os.ReadFile(file)
+	f, err := os.ReadFile(file)
 	if err != nil {
 		return err
 	}
-	return yaml.Unmarshal(yamlFile, C)
+	return yaml.Unmarshal(f, C)
 }

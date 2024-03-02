@@ -4,6 +4,7 @@ import (
 	"X_UGC/biz/handler"
 	"X_UGC/biz/mw"
 	"X_UGC/conf"
+	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -16,7 +17,7 @@ func Register() *gin.Engine {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	r := gin.New()
-	r.Use(gin.Logger(), gin.Recovery(), mw.CORS())
+	r.Use(gin.Logger(), gin.Recovery(), gzip.Gzip(gzip.DefaultCompression), mw.CORS())
 	r.Static("/static/", "./view/static/")
 	r.StaticFS("/upload", gin.Dir("./upload/", true))
 	r.LoadHTMLGlob("./view/*.html")

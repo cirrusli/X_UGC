@@ -1,7 +1,7 @@
 package dal
 
 import (
-	model2 "X_UGC/biz/model"
+	"X_UGC/biz/model"
 	"X_UGC/conf"
 	"fmt"
 	"github.com/jinzhu/gorm"
@@ -33,14 +33,14 @@ func CloseMySQL() {
 // InitTables 初始化表模型，包括外键等约束
 func InitTables() {
 	// 模型绑定
-	DB.AutoMigrate(&model2.User{}, &model2.UserInfo{}, &model2.ArticleTypeDict{}, &model2.ArticleInfo{}, &model2.FollowFansCount{}, &model2.Weight{}, &model2.Comment{})
+	DB.AutoMigrate(&model.User{}, &model.UserInfo{}, &model.ArticleTypeDict{}, &model.ArticleInfo{}, &model.FollowFansCount{}, &model.Weight{}, &model.Comment{})
 	// 外键添加
-	DB.Model(&model2.UserInfo{}).AddForeignKey("user_id", "users(id)", "cascade", "cascade")
-	DB.Model(&model2.ArticleInfo{}).AddForeignKey("author_id", "users(id)", "cascade", "cascade")
-	DB.Model(&model2.FollowFansCount{}).AddForeignKey("user_id", "users(id)", "cascade", "cascade")
-	DB.Model(&model2.ArticleInfo{}).AddForeignKey("article_type_id", "article_type_dicts(id)", "cascade", "cascade")
-	DB.Model(&model2.Weight{}).AddForeignKey("user_id", "users(id)", "cascade", "cascade")
-	DB.Model(&model2.Weight{}).AddForeignKey("article_type_id", "article_type_dicts(id)", "cascade", "cascade")
-	DB.Model(&model2.Comment{}).AddForeignKey("article_id", "article_infos(id)", "cascade", "cascade")
-	DB.Model(&model2.Comment{}).AddForeignKey("user_id", "users(id)", "cascade", "cascade")
+	DB.Model(&model.UserInfo{}).AddForeignKey("user_id", "users(id)", "cascade", "cascade")
+	DB.Model(&model.ArticleInfo{}).AddForeignKey("author_id", "users(id)", "cascade", "cascade")
+	DB.Model(&model.FollowFansCount{}).AddForeignKey("user_id", "users(id)", "cascade", "cascade")
+	DB.Model(&model.ArticleInfo{}).AddForeignKey("article_type_id", "article_type_dicts(id)", "cascade", "cascade")
+	DB.Model(&model.Weight{}).AddForeignKey("user_id", "users(id)", "cascade", "cascade")
+	DB.Model(&model.Weight{}).AddForeignKey("article_type_id", "article_type_dicts(id)", "cascade", "cascade")
+	DB.Model(&model.Comment{}).AddForeignKey("article_id", "article_infos(id)", "cascade", "cascade")
+	DB.Model(&model.Comment{}).AddForeignKey("user_id", "users(id)", "cascade", "cascade")
 }
