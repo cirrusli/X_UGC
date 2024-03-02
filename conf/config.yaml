@@ -12,8 +12,7 @@ mysql:
 redis:
   #Before redis6.0,do not fill in the username
   username:
-#  password: Redis:0617
-  password:
+  password: Redis:0617
   host: 39.106.19.20
   port: 6379
   db: 0

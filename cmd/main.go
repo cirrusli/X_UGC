@@ -21,6 +21,12 @@ func main() {
 	if err := initConfig(configPath); err != nil {
 		log.Fatalln("Failed to initialize config: ", err)
 	}
+	//启动协程监听confirm发布确认
+	go rabbitmq.RMQ.ListenConfirm()
+	rabbitmq.RMQ.StartConsumers()
+	defer rabbitmq.RMQ.Close()
+
+	go ws.WsManager.Start()
 
 	if err := startServer(); err != nil {
 		log.Fatalln("Failed to start server: ", err)
@@ -46,11 +52,6 @@ func initConfig(path string) error {
 	if err := rabbitmq.RMQ.InitRabbitMQ(conf.C.RabbitMQ); err != nil {
 		return fmt.Errorf("init rabbitmq failed: %w", err)
 	}
-	go rabbitmq.RMQ.ListenConfirm()
-	rabbitmq.RMQ.StartConsumers()
-	defer rabbitmq.RMQ.Close()
-
-	go ws.WsManager.Start()
 
 	return nil
 }
