@@ -2,6 +2,7 @@ package redis
 
 import (
 	"context"
+	"errors"
 	"github.com/go-redis/redis/v8"
 	"time"
 )
@@ -55,7 +56,7 @@ func SRandMember(key string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	result, err := RDB.SRandMember(ctx, key).Result()
 	defer cancel()
-	if err == redis.Nil {
+	if errors.Is(err, redis.Nil) {
 		return "", nil
 	}
 	if err != nil {
@@ -69,7 +70,7 @@ func SRandMemberN(key string, count int64) ([]string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	result, err := RDB.SRandMemberN(ctx, key, count).Result()
 	defer cancel()
-	if err == redis.Nil {
+	if errors.Is(err, redis.Nil) {
 		return nil, nil
 	}
 	if err != nil {

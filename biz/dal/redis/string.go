@@ -2,6 +2,7 @@ package redis
 
 import (
 	"context"
+	"errors"
 	"github.com/go-redis/redis/v8"
 	"time"
 )
@@ -22,7 +23,7 @@ func Get(key string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	val, err := RDB.Get(ctx, key).Result()
 	defer cancel()
-	if err == redis.Nil {
+	if errors.Is(err, redis.Nil) {
 		return "", nil
 	} else if err != nil {
 		return "", err

@@ -2,6 +2,7 @@ package redis
 
 import (
 	"context"
+	"errors"
 	"github.com/go-redis/redis/v8"
 	"log"
 	"time"
@@ -71,7 +72,7 @@ func ZRank(key string, member string) (int, error) {
 	result, err := RDB.ZRank(ctx, key, member).Result()
 	defer cancel()
 	log.Println(result)
-	if err == redis.Nil {
+	if errors.Is(err, redis.Nil) {
 		return 0, nil
 	}
 	if err != nil {

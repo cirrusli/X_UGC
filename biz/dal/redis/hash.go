@@ -2,6 +2,7 @@ package redis
 
 import (
 	"context"
+	"errors"
 	"github.com/go-redis/redis/v8"
 	"time"
 )
@@ -22,7 +23,7 @@ func HGet(key string, field string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	val, err := RDB.HGet(ctx, key, field).Result()
 	defer cancel()
-	if err == redis.Nil {
+	if errors.Is(err, redis.Nil) {
 		return "", nil
 	} else if err != nil {
 		return "", err
@@ -35,7 +36,7 @@ func HGetAll(key string) (map[string]string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	vals, err := RDB.HGetAll(ctx, key).Result()
 	defer cancel()
-	if err == redis.Nil {
+	if errors.Is(err, redis.Nil) {
 		return nil, nil
 	} else if err != nil {
 		return nil, err
