@@ -13,44 +13,49 @@ import (
 )
 
 func main() {
-	if len(os.Args) < 2 {
-		log.Fatalln("Missing parameter ./conf/config.yaml")
+	configPath := "./conf/config.yaml"
+	if len(os.Args) >= 2 {
+		configPath = os.Args[1]
 	}
-	err := conf.Init(os.Args[1])
-	if err != nil {
-		log.Fatalln("Load config file failed: ", err)
+
+	if err := initConfig(configPath); err != nil {
+		log.Fatalln("Failed to initialize config: ", err)
 	}
-	err = dal.InitMySQL(conf.C.MySQL)
-	if err != nil {
-		log.Fatalln("Init mysql failed: ", err)
+
+	if err := startServer(); err != nil {
+		log.Fatalln("Failed to start server: ", err)
+	}
+}
+
+func initConfig(path string) error {
+	if err := conf.Init(path); err != nil {
+		return fmt.Errorf("load config file failed: %w", err)
+	}
+
+	if err := dal.InitMySQL(conf.C.MySQL); err != nil {
+		return fmt.Errorf("init mysql failed: %w", err)
 	}
 	defer dal.CloseMySQL()
 	dal.InitTables()
 
-	err = redis.Init(conf.C.Redis)
-	if err != nil {
-		log.Fatalln("Init redis failed: ", err)
+	if err := redis.Init(conf.C.Redis); err != nil {
+		return fmt.Errorf("init redis failed: %w", err)
 	}
 	defer redis.Close()
 
-	err = rabbitmq.RMQ.InitRabbitMQ(conf.C.RabbitMQ)
-	if err != nil {
-		fmt.Printf("init rabbitmq failed, err:%v\n", err)
-		return
+	if err := rabbitmq.RMQ.InitRabbitMQ(conf.C.RabbitMQ); err != nil {
+		return fmt.Errorf("init rabbitmq failed: %w", err)
 	}
-	//启动协程监听confirm发布确认
 	go rabbitmq.RMQ.ListenConfirm()
-
 	rabbitmq.RMQ.StartConsumers()
-
 	defer rabbitmq.RMQ.Close()
 
-	//启动ws服务
 	go ws.WsManager.Start()
 
+	return nil
+}
+
+func startServer() error {
 	r := router.Register()
-	err = r.Run(fmt.Sprintf(":%d", conf.C.Port))
-	if err != nil {
-		log.Fatalln("Server start failed: ", err)
-	}
+	return r.Run(fmt.Sprintf(":%d", conf.C.Port))
 }
