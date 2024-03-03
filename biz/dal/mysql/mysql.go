@@ -1,4 +1,4 @@
-package dal
+package mysql
 
 import (
 	"X_UGC/biz/model"
@@ -18,7 +18,7 @@ func InitMySQL(c *conf.MySQL) (err error) {
 	DB, err = gorm.Open("mysql", dsn)
 
 	if err != nil {
-		return
+		return err
 	}
 	return DB.DB().Ping()
 }

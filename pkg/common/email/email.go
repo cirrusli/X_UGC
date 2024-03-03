@@ -29,10 +29,10 @@ func SendCode(userEmail string) (string, error) {
             尊敬的用户，您好！
         </div>
         <div style="padding: 8px 40px 8px 50px;">
-            <p>你本次的验证码为%s,为了保证账号安全，验证码有效期为1分钟。请确认为本人操作，切勿向他人泄露，感谢您的理解与使用。</p>
+            <p>本次的验证码为%s,为保证账号安全，验证码有效期为1分钟。请确认为本人操作，切勿向他人泄露，感谢您的理解与使用。</p>
         </div>
         <div>
-            <p>此邮箱为系统邮箱，请勿回复。</p>
+            <p>此邮件为系统发送，请勿回复。</p>
         </div>
     </div>`, code)
 	em.HTML = []byte(html)

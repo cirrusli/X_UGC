@@ -1,7 +1,7 @@
 package main
 
 import (
-	"X_UGC/biz/dal"
+	"X_UGC/biz/dal/mysql"
 	"X_UGC/biz/dal/rabbitmq"
 	"X_UGC/biz/dal/redis"
 	"X_UGC/biz/router"
@@ -21,9 +21,8 @@ func main() {
 	if err := initConfig(configPath); err != nil {
 		log.Fatalln("Failed to initialize config: ", err)
 	}
-	//启动协程监听confirm发布确认
-	go rabbitmq.RMQ.ListenConfirm()
-	rabbitmq.RMQ.StartConsumers()
+	defer mysql.CloseMySQL()
+	defer redis.Close()
 	defer rabbitmq.RMQ.Close()
 
 	go ws.WsManager.Start()
@@ -38,20 +37,22 @@ func initConfig(path string) error {
 		return fmt.Errorf("load config file failed: %w", err)
 	}
 
-	if err := dal.InitMySQL(conf.C.MySQL); err != nil {
+	if err := mysql.InitMySQL(conf.C.MySQL); err != nil {
 		return fmt.Errorf("init mysql failed: %w", err)
 	}
-	defer dal.CloseMySQL()
-	dal.InitTables()
+
+	mysql.InitTables()
 
 	if err := redis.Init(conf.C.Redis); err != nil {
 		return fmt.Errorf("init redis failed: %w", err)
 	}
-	defer redis.Close()
 
 	if err := rabbitmq.RMQ.InitRabbitMQ(conf.C.RabbitMQ); err != nil {
 		return fmt.Errorf("init rabbitmq failed: %w", err)
 	}
+	//启动协程监听confirm发布确认
+	go rabbitmq.RMQ.ListenConfirm()
+	rabbitmq.RMQ.StartConsumers()
 
 	return nil
 }

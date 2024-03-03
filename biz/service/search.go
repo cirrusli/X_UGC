@@ -1,7 +1,7 @@
 package service
 
 import (
-	"X_UGC/biz/dal"
+	"X_UGC/biz/dal/mysql"
 	redis2 "X_UGC/biz/dal/redis"
 	model2 "X_UGC/biz/model"
 	"os"
@@ -34,7 +34,7 @@ func GetAllSearchRecord(userid int, pageIndex int64, pageSize int64) (searchReco
 
 // SearchUserByUserName 根据用户名搜索用户
 func SearchUserByUserName(searchString string, pageIndex int, pageSize int) (userInfoList []*model2.UserInfo, err error) {
-	err = dal.DB.Select("*").Where("instr(user_name,?)", searchString).
+	err = mysql.DB.Select("*").Where("instr(user_name,?)", searchString).
 		Joins("inner join follow_fans_counts on user_infos.user_id=follow_fans_counts.user_id").
 		Order("fans_count desc").
 		Offset((pageIndex - 1) * pageSize).Limit(pageSize).
@@ -44,7 +44,7 @@ func SearchUserByUserName(searchString string, pageIndex int, pageSize int) (use
 
 // SearchUser 根据账号和用户名搜索用户
 func SearchUser(searchString string, pageIndex int, pageSize int) (userInfoList []*model2.UserInfo, err error) {
-	err = dal.DB.Select("*").Where("instr(number,?) or instr(email,?) or instr(user_name,?)", searchString, searchString, searchString).
+	err = mysql.DB.Select("*").Where("instr(number,?) or instr(email,?) or instr(user_name,?)", searchString, searchString, searchString).
 		Joins("inner join users on user_infos.user_id=users.id").
 		Joins("inner join follow_fans_counts on user_infos.user_id=follow_fans_counts.user_id").
 		Order("fans_count desc").
@@ -55,7 +55,7 @@ func SearchUser(searchString string, pageIndex int, pageSize int) (userInfoList 
 
 // SearchArticle  根据标题或内容搜索文章
 func SearchArticle(searchString string, pageIndex int, pageSize int) (articleInfoList []*model2.ArticleInfo, err error) {
-	rows, err := dal.DB.Model(&model2.ArticleInfo{}).
+	rows, err := mysql.DB.Model(&model2.ArticleInfo{}).
 		Where("instr(title,?) or instr(content,?)", searchString, searchString).
 		Order("give_like_count desc,comment_count desc,id desc").
 		Offset((pageIndex - 1) * pageSize).Limit(pageSize).Rows()
@@ -66,7 +66,7 @@ func SearchArticle(searchString string, pageIndex int, pageSize int) (articleInf
 	for rows.Next() {
 		var articleInfo = &model2.ArticleInfo{}
 		// ScanRows 方法用于将一行记录扫描至结构体
-		dal.DB.ScanRows(rows, articleInfo)
+		mysql.DB.ScanRows(rows, articleInfo)
 		// 业务逻辑
 		articleInfo.AuthorInfo, _ = GetAUserInfoByUserId(articleInfo.AuthorID)
 		dir, _ := os.ReadDir(articleInfo.ResourceDir)
@@ -81,7 +81,7 @@ func SearchArticle(searchString string, pageIndex int, pageSize int) (articleInf
 
 // SearchArticleByType 根据文章类型以及标题或内容搜索文章
 func SearchArticleByType(searchString string, articleTypeId int, pageIndex int, pageSize int) (articleInfoList []*model2.ArticleInfo, err error) {
-	rows, err := dal.DB.Model(&model2.ArticleInfo{}).
+	rows, err := mysql.DB.Model(&model2.ArticleInfo{}).
 		Where("(instr(title,?) or instr(content,?)) and article_type_id=?", searchString, searchString, articleTypeId).
 		Order("give_like_count desc,comment_count desc,id desc").
 		Offset((pageIndex - 1) * pageSize).Limit(pageSize).Rows()
@@ -92,7 +92,7 @@ func SearchArticleByType(searchString string, articleTypeId int, pageIndex int, 
 	for rows.Next() {
 		var articleInfo = &model2.ArticleInfo{}
 		// ScanRows 方法用于将一行记录扫描至结构体
-		dal.DB.ScanRows(rows, articleInfo)
+		mysql.DB.ScanRows(rows, articleInfo)
 		// 业务逻辑
 		articleInfo.AuthorInfo, _ = GetAUserInfoByUserId(articleInfo.AuthorID)
 		dir, _ := os.ReadDir(articleInfo.ResourceDir)

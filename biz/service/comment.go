@@ -1,7 +1,7 @@
 package service
 
 import (
-	"X_UGC/biz/dal"
+	"X_UGC/biz/dal/mysql"
 	"X_UGC/biz/dal/redis"
 	"X_UGC/biz/model"
 	"github.com/jinzhu/gorm"
@@ -10,27 +10,27 @@ import (
 
 // AddComment  添加评论
 func AddComment(comment *model.Comment) (err error) {
-	err = dal.DB.Create(comment).Error
+	err = mysql.DB.Create(comment).Error
 	return
 }
 
 // DeleteComment  删除评论
 func DeleteComment(commentId int, level int) (err error) {
-	err = dal.DB.Where("id=?", commentId).Delete(&model.Comment{}).Error
+	err = mysql.DB.Where("id=?", commentId).Delete(&model.Comment{}).Error
 	if err != nil {
 		return err
 	}
 	if level == 1 {
-		err = dal.DB.Where("level=2 and comment_group=?", commentId).Delete(&model.Comment{}).Error
+		err = mysql.DB.Where("level=2 and comment_group=?", commentId).Delete(&model.Comment{}).Error
 	} else if level == 2 {
-		err = dal.DB.Where("level=2 and reply_comment_id=?", commentId).Delete(&model.Comment{}).Error
+		err = mysql.DB.Where("level=2 and reply_comment_id=?", commentId).Delete(&model.Comment{}).Error
 	}
 	return
 }
 
 // IncrCommentGiveLike 评论点赞
 func IncrCommentGiveLike(userid int, commentId int) (err error) {
-	err = dal.DB.Model(&model.Comment{}).Where("id=?", commentId).Update("give_like_count", gorm.Expr("give_like_count + ?", 1)).Error
+	err = mysql.DB.Model(&model.Comment{}).Where("id=?", commentId).Update("give_like_count", gorm.Expr("give_like_count + ?", 1)).Error
 	if err != nil {
 		return err
 	}
@@ -40,7 +40,7 @@ func IncrCommentGiveLike(userid int, commentId int) (err error) {
 
 // DecrCommentGiveLike 取消评论点赞
 func DecrCommentGiveLike(userid int, commentId int) (err error) {
-	err = dal.DB.Model(&model.Comment{}).Where("id=?", commentId).Update("give_like_count", gorm.Expr("give_like_count - ?", 1)).Error
+	err = mysql.DB.Model(&model.Comment{}).Where("id=?", commentId).Update("give_like_count", gorm.Expr("give_like_count - ?", 1)).Error
 	if err != nil {
 		return err
 	}
@@ -57,7 +57,7 @@ func IsCommentGiveLike(userid int, commentId int) (exist bool, err error) {
 // GetCommentById 根据commentId获取评论信息
 func GetCommentById(commentId int) (comment *model.Comment, err error) {
 	comment = new(model.Comment)
-	if err = dal.DB.Where("id=?", commentId).First(comment).Error; err != nil {
+	if err = mysql.DB.Where("id=?", commentId).First(comment).Error; err != nil {
 		return nil, err
 	}
 	return
@@ -65,7 +65,7 @@ func GetCommentById(commentId int) (comment *model.Comment, err error) {
 
 // GetCommentByHeat 根据热度获一级评论
 func GetCommentByHeat(userid int, articleId int, pageIndex int, pageSize int) (commentList []*model.Comment, err error) {
-	rows, err := dal.DB.Model(&model.Comment{}).Where("article_id=? and level=1", articleId).Order("give_like_count desc,id desc").Offset((pageIndex - 1) * pageSize).Limit(pageSize).Rows()
+	rows, err := mysql.DB.Model(&model.Comment{}).Where("article_id=? and level=1", articleId).Order("give_like_count desc,id desc").Offset((pageIndex - 1) * pageSize).Limit(pageSize).Rows()
 	if err != nil {
 		return nil, err
 	}
@@ -73,13 +73,13 @@ func GetCommentByHeat(userid int, articleId int, pageIndex int, pageSize int) (c
 	for rows.Next() {
 		var comment = &model.Comment{}
 		// ScanRows 方法用于将一行记录扫描至结构体
-		dal.DB.ScanRows(rows, comment)
+		mysql.DB.ScanRows(rows, comment)
 		//业务逻辑
 		userInfo, err := GetAUserInfoByUserId(comment.UserID)
 		if err != nil {
 			return nil, err
 		}
-		dal.DB.Model(&model.Comment{}).Where("reply_comment_id =?", comment.ID).Count(&comment.SecondCommentsCount)
+		mysql.DB.Model(&model.Comment{}).Where("reply_comment_id =?", comment.ID).Count(&comment.SecondCommentsCount)
 		comment.UserInfo = userInfo
 		comment.IsGiveLike, _ = IsCommentGiveLike(userid, comment.ID)
 		commentList = append(commentList, comment)
@@ -89,7 +89,7 @@ func GetCommentByHeat(userid int, articleId int, pageIndex int, pageSize int) (c
 
 // GetReplyCommentByHeat 根据热度获二级评论
 func GetReplyCommentByHeat(userid int, articleId int, commentId int, pageIndex int, pageSize int) (commentList []*model.Comment, err error) {
-	rows, err := dal.DB.Model(&model.Comment{}).Where("article_id=? and level=2 and comment_group=?", articleId, commentId).Order("give_like_count desc,id desc").Offset((pageIndex - 1) * pageSize).Limit(pageSize).Rows()
+	rows, err := mysql.DB.Model(&model.Comment{}).Where("article_id=? and level=2 and comment_group=?", articleId, commentId).Order("give_like_count desc,id desc").Offset((pageIndex - 1) * pageSize).Limit(pageSize).Rows()
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +97,7 @@ func GetReplyCommentByHeat(userid int, articleId int, commentId int, pageIndex i
 	for rows.Next() {
 		var comment = &model.Comment{}
 		// ScanRows 方法用于将一行记录扫描至结构体
-		dal.DB.ScanRows(rows, comment)
+		mysql.DB.ScanRows(rows, comment)
 		//业务逻辑
 		replyUserName, err := GetAUserNameByUserId(comment.ReplyUserID)
 		if err != nil {

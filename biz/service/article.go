@@ -1,13 +1,12 @@
 package service
 
 import (
-	"X_UGC/biz/dal"
+	"X_UGC/biz/dal/mysql"
 	redis2 "X_UGC/biz/dal/redis"
 	model2 "X_UGC/biz/model"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -17,7 +16,7 @@ import (
 // GetArticleTypeById 根据类型id获取文章类型
 func GetArticleTypeById(id int) (articleType *model2.ArticleTypeDict) {
 	articleType = new(model2.ArticleTypeDict)
-	if err := dal.DB.Where("id = ?", id).First(articleType).Error; err != nil {
+	if err := mysql.DB.Where("id = ?", id).First(articleType).Error; err != nil {
 		return nil
 	}
 	return
@@ -25,7 +24,7 @@ func GetArticleTypeById(id int) (articleType *model2.ArticleTypeDict) {
 
 // GetAllArticleType  获取所有文章类型
 func GetAllArticleType() (articleTypeList []*model2.ArticleTypeDict, err error) {
-	if err = dal.DB.Find(&articleTypeList).Error; err != nil {
+	if err = mysql.DB.Find(&articleTypeList).Error; err != nil {
 		return nil, err
 	}
 	return
@@ -76,7 +75,7 @@ func UploadPhotoArticleResource(c *gin.Context) (coverFilePath string, articleFi
 
 // AddArticle 创建一篇文章
 func AddArticle(articleInfo *model2.ArticleInfo) (err error) {
-	err = dal.DB.Create(articleInfo).Error
+	err = mysql.DB.Create(articleInfo).Error
 	return
 }
 
@@ -153,14 +152,14 @@ func GetArticleFromFollow(userid int, pageIndex int64, pageSize int64) (articleI
 // GetArticleById  根据article的id获取一篇文章
 func GetArticleById(articleId int) (articleInfo *model2.ArticleInfo, err error) {
 	articleInfo = new(model2.ArticleInfo)
-	if err = dal.DB.Where("id = ?", articleId).First(articleInfo).Error; err != nil {
+	if err = mysql.DB.Where("id = ?", articleId).First(articleInfo).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
 		return nil, err
 	}
 	articleInfo.AuthorInfo, _ = GetAUserInfoByUserId(articleInfo.AuthorID)
-	dir, _ := ioutil.ReadDir(articleInfo.ResourceDir)
+	dir, _ := os.ReadDir(articleInfo.ResourceDir)
 	for _, fi := range dir {
 		articleInfo.ResourceUrl = append(articleInfo.ResourceUrl, articleInfo.ResourceDir+fi.Name())
 	}
@@ -170,7 +169,7 @@ func GetArticleById(articleId int) (articleInfo *model2.ArticleInfo, err error) 
 
 // GetAllArticle  获取用户所有文章
 func GetAllArticle(userid int) (articleInfoList []*model2.ArticleInfo, err error) {
-	rows, err := dal.DB.Model(&model2.ArticleInfo{}).Where("author_id = ?", userid).Rows()
+	rows, err := mysql.DB.Model(&model2.ArticleInfo{}).Where("author_id = ?", userid).Rows()
 	if err != nil {
 		return nil, err
 	}
@@ -178,7 +177,7 @@ func GetAllArticle(userid int) (articleInfoList []*model2.ArticleInfo, err error
 	for rows.Next() {
 		var articleInfo = &model2.ArticleInfo{}
 		// ScanRows 方法用于将一行记录扫描至结构体
-		dal.DB.ScanRows(rows, articleInfo)
+		mysql.DB.ScanRows(rows, articleInfo)
 		// 业务逻辑
 		articleInfo.AuthorInfo, _ = GetAUserInfoByUserId(userid)
 		dir, _ := os.ReadDir(articleInfo.ResourceDir)
@@ -193,7 +192,7 @@ func GetAllArticle(userid int) (articleInfoList []*model2.ArticleInfo, err error
 
 // GetAllArticleByPage 分页获取用户所有文章
 func GetAllArticleByPage(userid int, pageIndex int, pageSize int) (articleInfoList []*model2.ArticleInfo, err error) {
-	rows, err := dal.DB.Model(&model2.ArticleInfo{}).Where("author_id = ?", userid).Offset((pageIndex - 1) * pageSize).Limit(pageSize).Rows()
+	rows, err := mysql.DB.Model(&model2.ArticleInfo{}).Where("author_id = ?", userid).Offset((pageIndex - 1) * pageSize).Limit(pageSize).Rows()
 	if err != nil {
 		return nil, err
 	}
@@ -201,7 +200,7 @@ func GetAllArticleByPage(userid int, pageIndex int, pageSize int) (articleInfoLi
 	for rows.Next() {
 		var articleInfo = &model2.ArticleInfo{}
 		// ScanRows 方法用于将一行记录扫描至结构体
-		dal.DB.ScanRows(rows, articleInfo)
+		mysql.DB.ScanRows(rows, articleInfo)
 		// 业务逻辑
 		articleInfo.AuthorInfo, _ = GetAUserInfoByUserId(userid)
 		dir, _ := os.ReadDir(articleInfo.ResourceDir)
@@ -217,7 +216,7 @@ func GetAllArticleByPage(userid int, pageIndex int, pageSize int) (articleInfoLi
 // GiveLikeByArticleId  给文章点赞
 func GiveLikeByArticleId(userid string, strArticleId string, giveLikeTime int64) (err error) {
 	//文章点赞总数加1
-	if err = dal.DB.Model(&model2.ArticleInfo{}).Where("id = ?", strArticleId).Update("give_like_count", gorm.Expr("give_like_count + ?", 1)).Error; err != nil {
+	if err = mysql.DB.Model(&model2.ArticleInfo{}).Where("id = ?", strArticleId).Update("give_like_count", gorm.Expr("give_like_count + ?", 1)).Error; err != nil {
 		return
 	}
 
@@ -239,7 +238,7 @@ func GiveLikeByArticleId(userid string, strArticleId string, giveLikeTime int64)
 
 // DelLikeByArticleId  取消文章点赞
 func DelLikeByArticleId(userid string, strArticleId string) (err error) {
-	if err = dal.DB.Model(&model2.ArticleInfo{}).Where("id = ?", strArticleId).Update("give_like_count", gorm.Expr("give_like_count - ?", 1)).Error; err != nil {
+	if err = mysql.DB.Model(&model2.ArticleInfo{}).Where("id = ?", strArticleId).Update("give_like_count", gorm.Expr("give_like_count - ?", 1)).Error; err != nil {
 		return
 	}
 	if err = redis2.ZRem(model2.GIVELIKE+userid, strArticleId); err != nil {
@@ -295,20 +294,20 @@ func GetGiveLikeArticleList(userid string, pageIndex int64, pageSize int64) ([]*
 
 // IncrCommentCount 评论数 + 1
 func IncrCommentCount(articleId int) (err error) {
-	err = dal.DB.Model(&model2.ArticleInfo{}).Where("id=?", articleId).Update("comment_count", gorm.Expr("comment_count + ?", 1)).Error
+	err = mysql.DB.Model(&model2.ArticleInfo{}).Where("id=?", articleId).Update("comment_count", gorm.Expr("comment_count + ?", 1)).Error
 	return
 }
 
 // DecrCommentCount 评论数 - 1
 func DecrCommentCount(articleId int) (err error) {
-	err = dal.DB.Model(&model2.ArticleInfo{}).Where("id=?", articleId).Update("comment_count", gorm.Expr("comment_count - ?", 1)).Error
+	err = mysql.DB.Model(&model2.ArticleInfo{}).Where("id=?", articleId).Update("comment_count", gorm.Expr("comment_count - ?", 1)).Error
 	return
 }
 
 // GetArticleTypeByArticleId 根据文章id获取文章类型id
 func GetArticleTypeByArticleId(articleId int) (articleTypeId int, err error) {
 	var articleInfo = model2.ArticleInfo{}
-	if err = dal.DB.Select("article_type_id").Where("id=?", articleId).First(&articleInfo).Error; err != nil {
+	if err = mysql.DB.Select("article_type_id").Where("id=?", articleId).First(&articleInfo).Error; err != nil {
 		return -1, err
 	}
 	articleTypeId = articleInfo.ArticleTypeID

@@ -62,7 +62,7 @@ func Register(c *gin.Context) {
 	var user = model.User{
 		Number:   jsonData["number"],
 		Email:    jsonData["email"],
-		Password: pwd.Encryption(jsonData["password"]),
+		Password: pwd.HashPassword(jsonData["password"]),
 	}
 	//2.判定邮箱验证码
 	val, err := redis.Get(user.Email)
@@ -108,7 +108,7 @@ func Login(c *gin.Context) {
 	account := c.PostForm("account")
 	p := c.PostForm("password")
 	user, err := service.CheckAccount(account)
-	isPwd := pwd.Decryption(user.Password, p)
+	isPwd := pwd.CheckPasswordHash(user.Password, p)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{"error": err.Error()})
 		return
@@ -217,8 +217,8 @@ func UpdateUserPassword(c *gin.Context) {
 		return
 	}
 	if val == jsonData["code"] {
-		if pwd.Decryption(user.Password, jsonData["old_pwd"]) {
-			err := service.UpdateUserPassword(userid, pwd.Encryption(jsonData["new_pwd"]))
+		if pwd.CheckPasswordHash(user.Password, jsonData["old_pwd"]) {
+			err := service.UpdateUserPassword(userid, pwd.HashPassword(jsonData["new_pwd"]))
 			if err != nil {
 				c.JSON(http.StatusOK, gin.H{"error": err.Error()})
 				return

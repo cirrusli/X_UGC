@@ -16,10 +16,13 @@ type MyClaims struct {
 }
 
 // TokenExpireDuration 定义JWT的过期时间 一个月
-const TokenExpireDuration = time.Hour * 720
+const (
+	TokenExpireDuration = time.Hour * 720
+	Issuer              = "admin"
+)
 
 // MySecret 定义Secret
-var MySecret = []byte("来自M78的token签名")
+var MySecret = []byte("目标BAT！！！")
 
 // GenToken 生成JWT
 func GenToken(userid int) (string, error) {
@@ -28,7 +31,7 @@ func GenToken(userid int) (string, error) {
 		UserID: userid, // 自定义字段
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(TokenExpireDuration).Unix(), // 过期时间
-			Issuer:    "admin",                                    // 签发人
+			Issuer:    Issuer,                                     // 签发人
 		},
 	}
 	// 使用指定的签名方法创建签名对象
