@@ -12,6 +12,7 @@ Gin,GORM,MySQL,Redis,RabbitMQ
 ├─assets
 ├─biz
 │  ├─dal
+│  │  ├─mysql
 │  │  ├─rabbitmq
 │  │  └─redis
 │  ├─handler
