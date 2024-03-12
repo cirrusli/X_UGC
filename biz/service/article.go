@@ -216,7 +216,8 @@ func GetAllArticleByPage(userid int, pageIndex int, pageSize int) (articleInfoLi
 // GiveLikeByArticleId  给文章点赞
 func GiveLikeByArticleId(userid string, strArticleId string, giveLikeTime int64) (err error) {
 	//文章点赞总数加1
-	if err = mysql.DB.Model(&model.ArticleInfo{}).Where("id = ?", strArticleId).Update("give_like_count", gorm.Expr("give_like_count + ?", 1)).Error; err != nil {
+	if err = mysql.DB.Model(&model.ArticleInfo{}).
+		Where("id = ?", strArticleId).Update("give_like_count", gorm.Expr("give_like_count + ?", 1)).Error; err != nil {
 		return
 	}
 
@@ -238,7 +239,8 @@ func GiveLikeByArticleId(userid string, strArticleId string, giveLikeTime int64)
 
 // DelLikeByArticleId  取消文章点赞
 func DelLikeByArticleId(userid string, strArticleId string) (err error) {
-	if err = mysql.DB.Model(&model.ArticleInfo{}).Where("id = ?", strArticleId).Update("give_like_count", gorm.Expr("give_like_count - ?", 1)).Error; err != nil {
+	if err = mysql.DB.Model(&model.ArticleInfo{}).
+		Where("id = ?", strArticleId).Update("give_like_count", gorm.Expr("give_like_count - ?", 1)).Error; err != nil {
 		return
 	}
 	if err = redis.ZRem(model.GIVELIKE+userid, strArticleId); err != nil {

@@ -7,7 +7,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"io"
-	"io/ioutil"
 	"log"
 	"mime/multipart"
 	"os"
@@ -59,9 +58,10 @@ func ArticleExist(userid int, hashPath string) ([]string, string, error) {
 		if fileExist {
 			return nil, FilePath, nil
 		} else {
-			dir, _ := ioutil.ReadDir(DirPath)
+			dir, _ := os.ReadDir(DirPath)
 			for _, fi := range dir {
-				if fi.Size() != chunkSize {
+				size, _ := fi.Info()
+				if size.Size() != chunkSize {
 					//首先文件名去除后缀，然后文件去除hash名和‘_’，得到不满足条件的chunk下标
 					chunkIndex := strings.TrimPrefix(strings.TrimSuffix(fi.Name(), filepath.Ext(fi.Name())), hashPath+"_")
 					chunkIndexList = append(chunkIndexList, chunkIndex)
@@ -106,7 +106,7 @@ func UploadFile(upFile multipart.File, upSeek int64, newFile *os.File, fSeek int
 	_, _ = upFile.Seek(upSeek, 0)
 	// 设置文件偏移量
 	_, _ = newFile.Seek(fSeek, 0)
-	data := make([]byte, 1024, 1024)
+	data := make([]byte, 1024)
 	upFileReader := bufio.NewReader(upFile)
 	newFileWriter := bufio.NewWriter(newFile)
 	for {
@@ -129,10 +129,11 @@ func UploadFile(upFile multipart.File, upSeek int64, newFile *os.File, fSeek int
 func MergeChunk(chunkTotal int, fileSize int64, hashPath string, fileExt string, userid int) (string, string, error) {
 	var lock sync.WaitGroup
 	DirPath := "./upload/article_resource/user_" + strconv.Itoa(userid) + "/video_" + hashPath
-	dir, _ := ioutil.ReadDir(DirPath)
+	dir, _ := os.ReadDir(DirPath)
 	var totalSize int64 = 0
 	for _, fi := range dir {
-		totalSize += fi.Size()
+		size, _ := fi.Info()
+		totalSize += size.Size()
 	}
 	if len(dir) == chunkTotal && totalSize == fileSize {
 		// 新文件创建
@@ -192,7 +193,7 @@ func MergeFile(i int, DirPath, hashPath, FileName string, lock *sync.WaitGroup) 
 		return
 	}
 	// 写入数据
-	data := make([]byte, 1024, 1024)
+	data := make([]byte, 1024)
 	chunkFileReader := bufio.NewReader(chunkFile)
 	fileWriter := bufio.NewWriter(file)
 	for {

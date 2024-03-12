@@ -49,6 +49,7 @@ func initConfig(path string) error {
 	}
 
 	if err := es.New(conf.C.ES); err != nil {
+		//NOTE: cannot confirm whether the server is running
 		return fmt.Errorf("init elasticsearch client connection failed: %w", err)
 
 	}

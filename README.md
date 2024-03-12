@@ -4,7 +4,7 @@
 
 ## 技术选型
 
-Gin,GORM,MySQL,Redis,RabbitMQ
+Gin,GORM,MySQL,Redis,RabbitMQ,Elasticsearch
 
 ## 项目结构
 
@@ -12,6 +12,7 @@ Gin,GORM,MySQL,Redis,RabbitMQ
 ├─assets
 ├─biz
 │  ├─dal
+│  │  ├─es
 │  │  ├─mysql
 │  │  ├─rabbitmq
 │  │  └─redis
