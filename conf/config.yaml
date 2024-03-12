@@ -10,7 +10,7 @@ mysql:
 
 
 redis:
-  #Before redis6.0,do not fill in the username
+  #Before Redis 6.0,do not fill in the username
   username:
   password: Redis:0617
   host: 39.106.19.20
@@ -23,3 +23,9 @@ rabbitmq:
   password: guest
   host: 127.0.0.1
   port: 5672
+
+es:
+  username: elastic
+  password: lts_ct6YcwZico7Ziy=7 #random
+  host: 127.0.0.1
+  port: 9200

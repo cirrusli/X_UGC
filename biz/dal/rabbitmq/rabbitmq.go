@@ -4,7 +4,6 @@ import (
 	"X_UGC/conf"
 	"fmt"
 	"github.com/streadway/amqp"
-	"log"
 	"log/slog"
 )
 
@@ -38,7 +37,7 @@ const (
 	CommentKey  = "comment_key"  //评论通知的routingKey
 )
 
-// InitRabbitMQ 初始胡MQ
+// InitRabbitMQ 初始化MQ
 func (mq *rabbitMQ) InitRabbitMQ(cfg *conf.RabbitMQ) (err error) {
 	err = mq.ConnRabbitMQ(cfg)
 	if err != nil {
@@ -87,7 +86,7 @@ func (mq *rabbitMQ) ConnRabbitMQ(cfg *conf.RabbitMQ) (err error) {
 		return err
 	}
 	if err = mq.channel.Qos(1, 0, true); err != nil {
-		log.Println("Queue Consume: ", err.Error())
+		slog.Info("Queue Consume: ", err.Error())
 		return err
 	}
 	mq.channelPool = make(map[string]*amqp.Channel)
@@ -101,12 +100,12 @@ func (mq *rabbitMQ) ConnRabbitMQ(cfg *conf.RabbitMQ) (err error) {
 		}
 		//设置不公平分发
 		if err := mq.channelPool[channelName].Qos(1, 0, true); err != nil {
-			log.Println("Qos error: ", err.Error())
+			slog.Warn("Qos error: ", err.Error())
 			return err
 		}
 		//confirm开启发布确认
 		if err := mq.channelPool[channelName].Confirm(false); err != nil {
-			log.Println("Confirm error: ", err.Error())
+			slog.Warn("Confirm error: ", err.Error())
 			return err
 		}
 		//异步发布确认
@@ -191,7 +190,7 @@ func (mq *rabbitMQ) ListenConfirm() {
 		confirm := <-mq.notifyConfirm
 		if !confirm.Ack {
 			//这里表示消息发送到mq失败,可以处理失败流程
-			log.Printf("message sending failure,it's number is : %d  ", confirm.DeliveryTag)
+			slog.Warn("message sending failure,it's number is: ", confirm.DeliveryTag)
 		}
 	}
 }
@@ -220,7 +219,7 @@ func (mq *rabbitMQ) QueueConsume(channelName, queueName string) (delivery <-chan
 		nil,       // args
 	)
 	if err != nil {
-		log.Println("Queue Consume: ", err.Error())
+		slog.Warn("Queue Consume: ", err.Error())
 		return nil, err
 	}
 	return delivery, nil

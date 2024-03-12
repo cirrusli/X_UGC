@@ -1,6 +1,7 @@
 package main
 
 import (
+	"X_UGC/biz/dal/es"
 	"X_UGC/biz/dal/mysql"
 	"X_UGC/biz/dal/rabbitmq"
 	"X_UGC/biz/dal/redis"
@@ -47,9 +48,15 @@ func initConfig(path string) error {
 		return fmt.Errorf("init redis failed: %w", err)
 	}
 
+	if err := es.New(conf.C.ES); err != nil {
+		return fmt.Errorf("init elasticsearch client connection failed: %w", err)
+
+	}
+
 	if err := rabbitmq.RMQ.InitRabbitMQ(conf.C.RabbitMQ); err != nil {
 		return fmt.Errorf("init rabbitmq failed: %w", err)
 	}
+
 	//启动协程监听confirm发布确认
 	go rabbitmq.RMQ.ListenConfirm()
 	rabbitmq.RMQ.StartConsumers()

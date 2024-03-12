@@ -2,8 +2,8 @@ package service
 
 import (
 	"X_UGC/biz/dal/mysql"
-	redis2 "X_UGC/biz/dal/redis"
-	model2 "X_UGC/biz/model"
+	"X_UGC/biz/dal/redis"
+	"X_UGC/biz/model"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -14,8 +14,8 @@ import (
 )
 
 // GetArticleTypeById 根据类型id获取文章类型
-func GetArticleTypeById(id int) (articleType *model2.ArticleTypeDict) {
-	articleType = new(model2.ArticleTypeDict)
+func GetArticleTypeById(id int) (articleType *model.ArticleTypeDict) {
+	articleType = new(model.ArticleTypeDict)
 	if err := mysql.DB.Where("id = ?", id).First(articleType).Error; err != nil {
 		return nil
 	}
@@ -23,7 +23,7 @@ func GetArticleTypeById(id int) (articleType *model2.ArticleTypeDict) {
 }
 
 // GetAllArticleType  获取所有文章类型
-func GetAllArticleType() (articleTypeList []*model2.ArticleTypeDict, err error) {
+func GetAllArticleType() (articleTypeList []*model.ArticleTypeDict, err error) {
 	if err = mysql.DB.Find(&articleTypeList).Error; err != nil {
 		return nil, err
 	}
@@ -74,14 +74,14 @@ func UploadPhotoArticleResource(c *gin.Context) (coverFilePath string, articleFi
 }
 
 // AddArticle 创建一篇文章
-func AddArticle(articleInfo *model2.ArticleInfo) (err error) {
+func AddArticle(articleInfo *model.ArticleInfo) (err error) {
 	err = mysql.DB.Create(articleInfo).Error
 	return
 }
 
 // InsertToArticlePool 向不同类型文章池内插入文章id
 func InsertToArticlePool(typeID int, articleId int) (err error) {
-	err = redis2.SAdd(model2.ARTICLE_POOL+strconv.Itoa(typeID), strconv.Itoa(articleId))
+	err = redis.SAdd(model.ARTICLE_POOL+strconv.Itoa(typeID), strconv.Itoa(articleId))
 	return
 }
 
@@ -92,7 +92,7 @@ func InsertToFriendArticleList(userid int, articleId int) error {
 		return err
 	}
 	for _, friendInfo := range userList {
-		err = redis2.LPush(model2.FRIEND_ARTICLE_LIST+strconv.Itoa(friendInfo.UserInfo.UserID), articleId)
+		err = redis.LPush(model.FRIEND_ARTICLE_LIST+strconv.Itoa(friendInfo.UserInfo.UserID), articleId)
 		if err != nil {
 			return err
 		}
@@ -107,7 +107,7 @@ func InsertToFansArticleList(userid int, articleId int) error {
 		return err
 	}
 	for _, fansInfo := range userList {
-		err = redis2.LPush(model2.FOLLOW_ARTICLE_LIST+strconv.Itoa(fansInfo.UserInfo.UserID), articleId)
+		err = redis.LPush(model.FOLLOW_ARTICLE_LIST+strconv.Itoa(fansInfo.UserInfo.UserID), articleId)
 		if err != nil {
 			return err
 		}
@@ -116,8 +116,8 @@ func InsertToFansArticleList(userid int, articleId int) error {
 }
 
 // GetArticleFromFriend 分页获取朋友的文章
-func GetArticleFromFriend(userid int, pageIndex int64, pageSize int64) (articleInfoList []*model2.ArticleInfo, err error) {
-	articleIdList, err := redis2.LRange(model2.FRIEND_ARTICLE_LIST+strconv.Itoa(userid), (pageIndex-1)*pageSize, pageIndex*pageSize-1)
+func GetArticleFromFriend(userid int, pageIndex int64, pageSize int64) (articleInfoList []*model.ArticleInfo, err error) {
+	articleIdList, err := redis.LRange(model.FRIEND_ARTICLE_LIST+strconv.Itoa(userid), (pageIndex-1)*pageSize, pageIndex*pageSize-1)
 	if err != nil {
 		return nil, err
 	}
@@ -133,8 +133,8 @@ func GetArticleFromFriend(userid int, pageIndex int64, pageSize int64) (articleI
 }
 
 // GetArticleFromFollow 分页获取关注的用户的文章
-func GetArticleFromFollow(userid int, pageIndex int64, pageSize int64) (articleInfoList []*model2.ArticleInfo, err error) {
-	articleIdList, err := redis2.LRange(model2.FOLLOW_ARTICLE_LIST+strconv.Itoa(userid), (pageIndex-1)*pageSize, pageIndex*pageSize-1)
+func GetArticleFromFollow(userid int, pageIndex int64, pageSize int64) (articleInfoList []*model.ArticleInfo, err error) {
+	articleIdList, err := redis.LRange(model.FOLLOW_ARTICLE_LIST+strconv.Itoa(userid), (pageIndex-1)*pageSize, pageIndex*pageSize-1)
 	if err != nil {
 		return nil, err
 	}
@@ -150,8 +150,8 @@ func GetArticleFromFollow(userid int, pageIndex int64, pageSize int64) (articleI
 }
 
 // GetArticleById  根据article的id获取一篇文章
-func GetArticleById(articleId int) (articleInfo *model2.ArticleInfo, err error) {
-	articleInfo = new(model2.ArticleInfo)
+func GetArticleById(articleId int) (articleInfo *model.ArticleInfo, err error) {
+	articleInfo = new(model.ArticleInfo)
 	if err = mysql.DB.Where("id = ?", articleId).First(articleInfo).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
@@ -168,14 +168,14 @@ func GetArticleById(articleId int) (articleInfo *model2.ArticleInfo, err error) 
 }
 
 // GetAllArticle  获取用户所有文章
-func GetAllArticle(userid int) (articleInfoList []*model2.ArticleInfo, err error) {
-	rows, err := mysql.DB.Model(&model2.ArticleInfo{}).Where("author_id = ?", userid).Rows()
+func GetAllArticle(userid int) (articleInfoList []*model.ArticleInfo, err error) {
+	rows, err := mysql.DB.Model(&model.ArticleInfo{}).Where("author_id = ?", userid).Rows()
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var articleInfo = &model2.ArticleInfo{}
+		var articleInfo = &model.ArticleInfo{}
 		// ScanRows 方法用于将一行记录扫描至结构体
 		mysql.DB.ScanRows(rows, articleInfo)
 		// 业务逻辑
@@ -191,14 +191,14 @@ func GetAllArticle(userid int) (articleInfoList []*model2.ArticleInfo, err error
 }
 
 // GetAllArticleByPage 分页获取用户所有文章
-func GetAllArticleByPage(userid int, pageIndex int, pageSize int) (articleInfoList []*model2.ArticleInfo, err error) {
-	rows, err := mysql.DB.Model(&model2.ArticleInfo{}).Where("author_id = ?", userid).Offset((pageIndex - 1) * pageSize).Limit(pageSize).Rows()
+func GetAllArticleByPage(userid int, pageIndex int, pageSize int) (articleInfoList []*model.ArticleInfo, err error) {
+	rows, err := mysql.DB.Model(&model.ArticleInfo{}).Where("author_id = ?", userid).Offset((pageIndex - 1) * pageSize).Limit(pageSize).Rows()
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var articleInfo = &model2.ArticleInfo{}
+		var articleInfo = &model.ArticleInfo{}
 		// ScanRows 方法用于将一行记录扫描至结构体
 		mysql.DB.ScanRows(rows, articleInfo)
 		// 业务逻辑
@@ -216,12 +216,12 @@ func GetAllArticleByPage(userid int, pageIndex int, pageSize int) (articleInfoLi
 // GiveLikeByArticleId  给文章点赞
 func GiveLikeByArticleId(userid string, strArticleId string, giveLikeTime int64) (err error) {
 	//文章点赞总数加1
-	if err = mysql.DB.Model(&model2.ArticleInfo{}).Where("id = ?", strArticleId).Update("give_like_count", gorm.Expr("give_like_count + ?", 1)).Error; err != nil {
+	if err = mysql.DB.Model(&model.ArticleInfo{}).Where("id = ?", strArticleId).Update("give_like_count", gorm.Expr("give_like_count + ?", 1)).Error; err != nil {
 		return
 	}
 
 	//返回纳秒作为zest的score ，记录点赞时间和点赞文章
-	if err = redis2.ZAdd(model2.GIVELIKE+userid, float64(giveLikeTime), strArticleId); err != nil {
+	if err = redis.ZAdd(model.GIVELIKE+userid, float64(giveLikeTime), strArticleId); err != nil {
 		return
 	}
 	//用户文章类型权重加1
@@ -238,10 +238,10 @@ func GiveLikeByArticleId(userid string, strArticleId string, giveLikeTime int64)
 
 // DelLikeByArticleId  取消文章点赞
 func DelLikeByArticleId(userid string, strArticleId string) (err error) {
-	if err = mysql.DB.Model(&model2.ArticleInfo{}).Where("id = ?", strArticleId).Update("give_like_count", gorm.Expr("give_like_count - ?", 1)).Error; err != nil {
+	if err = mysql.DB.Model(&model.ArticleInfo{}).Where("id = ?", strArticleId).Update("give_like_count", gorm.Expr("give_like_count - ?", 1)).Error; err != nil {
 		return
 	}
-	if err = redis2.ZRem(model2.GIVELIKE+userid, strArticleId); err != nil {
+	if err = redis.ZRem(model.GIVELIKE+userid, strArticleId); err != nil {
 		return
 	}
 	//用户文章类型权重减1
@@ -258,7 +258,7 @@ func DelLikeByArticleId(userid string, strArticleId string) (err error) {
 
 // IsGiveLikeByArticleId 判断文章是否点赞
 func IsGiveLikeByArticleId(userid string, articleId string) (int, error) {
-	isGiveLike, err := redis2.ZRank(model2.GIVELIKE+userid, articleId)
+	isGiveLike, err := redis.ZRank(model.GIVELIKE+userid, articleId)
 	if err != nil {
 		return -1, err
 	}
@@ -267,7 +267,7 @@ func IsGiveLikeByArticleId(userid string, articleId string) (int, error) {
 
 // GetGiveLikeArticleCount   获取点赞文章总数
 func GetGiveLikeArticleCount(userid string) (int, error) {
-	Len, err := redis2.ZCard(model2.GIVELIKE + userid)
+	Len, err := redis.ZCard(model.GIVELIKE + userid)
 	if err != nil {
 		return -1, err
 	}
@@ -275,12 +275,12 @@ func GetGiveLikeArticleCount(userid string) (int, error) {
 }
 
 // GetGiveLikeArticleList  获取点赞文章列表
-func GetGiveLikeArticleList(userid string, pageIndex int64, pageSize int64) ([]*model2.ArticleInfo, error) {
-	List, err := redis2.ZRevRange(model2.GIVELIKE+userid, (pageIndex-1)*pageSize, pageIndex*pageSize-1)
+func GetGiveLikeArticleList(userid string, pageIndex int64, pageSize int64) ([]*model.ArticleInfo, error) {
+	List, err := redis.ZRevRange(model.GIVELIKE+userid, (pageIndex-1)*pageSize, pageIndex*pageSize-1)
 	if err != nil {
 		return nil, err
 	}
-	var GiveLikeArticleList []*model2.ArticleInfo
+	var GiveLikeArticleList []*model.ArticleInfo
 	for _, strArticleId := range List {
 		articleId, _ := strconv.Atoi(strArticleId)
 		articleInfo, err := GetArticleById(articleId)
@@ -294,19 +294,19 @@ func GetGiveLikeArticleList(userid string, pageIndex int64, pageSize int64) ([]*
 
 // IncrCommentCount 评论数 + 1
 func IncrCommentCount(articleId int) (err error) {
-	err = mysql.DB.Model(&model2.ArticleInfo{}).Where("id=?", articleId).Update("comment_count", gorm.Expr("comment_count + ?", 1)).Error
+	err = mysql.DB.Model(&model.ArticleInfo{}).Where("id=?", articleId).Update("comment_count", gorm.Expr("comment_count + ?", 1)).Error
 	return
 }
 
 // DecrCommentCount 评论数 - 1
 func DecrCommentCount(articleId int) (err error) {
-	err = mysql.DB.Model(&model2.ArticleInfo{}).Where("id=?", articleId).Update("comment_count", gorm.Expr("comment_count - ?", 1)).Error
+	err = mysql.DB.Model(&model.ArticleInfo{}).Where("id=?", articleId).Update("comment_count", gorm.Expr("comment_count - ?", 1)).Error
 	return
 }
 
 // GetArticleTypeByArticleId 根据文章id获取文章类型id
 func GetArticleTypeByArticleId(articleId int) (articleTypeId int, err error) {
-	var articleInfo = model2.ArticleInfo{}
+	var articleInfo = model.ArticleInfo{}
 	if err = mysql.DB.Select("article_type_id").Where("id=?", articleId).First(&articleInfo).Error; err != nil {
 		return -1, err
 	}

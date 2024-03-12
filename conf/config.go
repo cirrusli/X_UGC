@@ -14,6 +14,7 @@ type App struct {
 	*MySQL    `yaml:"mysql"`
 	*Redis    `yaml:"redis"`
 	*RabbitMQ `yaml:"rabbitmq"`
+	*ES       `yaml:"es"`
 }
 
 // MySQL 数据库配置
@@ -37,6 +38,12 @@ type Redis struct {
 
 // RabbitMQ  rabbitmq配置
 type RabbitMQ struct {
+	UserName string `yaml:"username"`
+	Password string `yaml:"password"`
+	Host     string `yaml:"host"` //地址
+	Port     int    `yaml:"port"` //端口号
+}
+type ES struct {
 	UserName string `yaml:"username"`
 	Password string `yaml:"password"`
 	Host     string `yaml:"host"` //地址

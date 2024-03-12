@@ -53,5 +53,7 @@ func Register() *gin.Engine {
 
 	//注册搜索路由组
 	SearchGroups(r)
+	//elastic search version
+	//ESGroups(r)
 	return r
 }
